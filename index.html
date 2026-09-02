@@ -491,6 +491,7 @@
 
   function sendPosition(pos){
     sendToBackend({
+      tipo: 'ubicacion',
       id_salida: tripId,
       lat: pos.coords.latitude,
       lng: pos.coords.longitude,
