@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Salida — Famosa</title>
+<style>
+  :root{
+    --rojo: #DD091D;
+    --rojo-hover: #B80718;
+    --rojo-soft: #FDEBEC;
+    --amarillo: #FFED00;
+    --tinta: #24242B;
+    --tinta-suave: #6B6E76;
+    --linea: #ECE7E2;
+    --crema: #FBF3D9;
+    --crema-linea: #F0DFA0;
+    --fondo: #F7F4F1;
+    --radius: 14px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0; padding:0;
+    background: var(--fondo);
+    color: var(--tinta);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page{
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 28px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* decoraciones sutiles de fondo, como en la referencia */
+  .page::before, .page::after{
+    content:"";
+    position: absolute;
+    border-radius: 50%;
+    border: 22px solid;
+    opacity: 0.35;
+    z-index: 0;
+  }
+  .page::before{
+    width: 260px; height: 260px;
+    border-color: var(--crema);
+    bottom: -90px; left: -110px;
+  }
+  .page::after{
+    width: 200px; height: 200px;
+    border-color: var(--rojo-soft);
+    top: 60px; right: -90px;
+  }
+
+  .screen{
+    max-width: 460px;
+    width: 100%;
+    background: #fff;
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: 0 18px 50px -18px rgba(36,36,43,0.25);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---- Listón superior ---- */
+  .ribbon-top{ display: block; width: 100%; }
+  .ribbon-top svg{ display: block; width: 100%; height: auto; }
+
+  header.topbar{
+    padding: 6px 26px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .logo-badge{
+    flex-shrink: 0;
+    width: 84px; height: 54px;
+    border-radius: 50% / 44%;
+    background: var(--rojo);
+    border: 3px solid var(--amarillo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+  }
+  .logo-badge span{
+    color: #fff;
+    font-weight: 800;
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+    font-style: italic;
+  }
+
+  .brandline{ text-align: center; flex: 1; }
+  .brandline .name{ font-size: 15px; font-weight: 800; }
+  .brandline .name .r{ color: var(--rojo); }
+  .brandline .name .sep{ color: var(--tinta-suave); font-weight: 500; }
+
+  .clock{
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12.5px;
+    color: var(--tinta-suave);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .clock svg{ width: 14px; height: 14px; stroke: var(--tinta-suave); }
+
+  main{ padding: 8px 26px 34px; }
+
+  .hero{
+    text-align: center;
+    margin-bottom: 26px;
+  }
+  .hero-icon{
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--rojo-soft);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .hero-icon svg{ width: 26px; height: 26px; stroke: var(--rojo); }
+
+  .title{
+    font-size: 23px;
+    font-weight: 800;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle{
+    font-size: 13.5px;
+    color: var(--tinta-suave);
+    margin: 0 auto;
+    line-height: 1.55;
+    max-width: 30ch;
+  }
+
+  form{ display: flex; flex-direction: column; gap: 20px; }
+
+  .field{ display: flex; flex-direction: column; gap: 8px; }
+  .field .label-row{
+    display: flex; align-items: center; gap: 8px;
+  }
+  .field .label-row svg{ width: 16px; height: 16px; stroke: var(--rojo); flex-shrink: 0; }
+  .field label{
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--tinta);
+  }
+
+  input[type="text"], input[type="time"], textarea{
+    border: 1.5px solid var(--linea);
+    border-radius: 12px;
+    padding: 13px 15px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--tinta);
+    background: #fff;
+    outline: none;
+    transition: border-color .15s ease;
+  }
+  input[type="text"]:focus, input[type="time"]:focus, textarea:focus{
+    border-color: var(--rojo);
+  }
+  input::placeholder, textarea::placeholder{ color: #B7B4B0; }
+  textarea{ resize: vertical; min-height: 62px; line-height: 1.45; }
+
+  .row2{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .consent{
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 18px;
+    border: 1.5px solid var(--crema-linea);
+    background: var(--crema);
+    border-radius: var(--radius);
+    margin-top: 2px;
+  }
+  .consent-illustration{
+    flex-shrink: 0;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    border: 2px dashed var(--amarillo);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .consent-illustration svg{ width: 20px; height: 20px; fill: var(--rojo); }
+  .consent input[type="checkbox"]{
+    width: 20px; height: 20px;
+    margin-top: 2px;
+    accent-color: var(--rojo);
+    flex-shrink: 0;
+  }
+  .consent .consent-text{ font-size: 13px; line-height: 1.55; color: #57524A; }
+  .consent .consent-text strong{ color: var(--rojo); font-weight: 800; }
+  .consent-check-wrap{ display:flex; align-items:flex-start; gap: 12px; }
+
+  .error-text{
+    font-size: 12.5px;
+    color: var(--rojo);
+    display: none;
+  }
+
+  button.submit{
+    margin-top: 6px;
+    border: none;
+    background: linear-gradient(180deg, var(--rojo) 0%, var(--rojo-hover) 100%);
+    color: #fff;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 15.5px;
+    padding: 17px;
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    transition: filter .15s ease, transform .05s ease;
+    box-shadow: 0 10px 22px -8px rgba(221,9,29,0.55);
+  }
+  button.submit svg{ width: 18px; height: 18px; }
+  button.submit:hover{ filter: brightness(1.05); }
+  button.submit:active{ transform: scale(0.99); }
+  button.submit:disabled{
+    background: #C9C6C2; box-shadow: none; cursor: not-allowed;
+  }
+
+  .ribbon-bottom{ display: block; width: 100%; margin-top: auto; }
+  .ribbon-bottom svg{ display: block; width: 100%; height: auto; }
+
+  /* ---- Vista de viaje activo ---- */
+  .active-view{ display: none; flex-direction: column; }
+  .active-view.show{ display: flex; }
+  .form-view.hide{ display: none; }
+
+  .status-block{
+    padding: 30px 26px 26px;
+    background: var(--tinta);
+    color: #fff;
+  }
+  .status-tag{
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 800; color: var(--amarillo);
+    margin-bottom: 14px;
+  }
+  .status-tag .dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--amarillo);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+  .status-block .who{ font-size: 20px; font-weight: 800; margin: 0 0 4px; }
+  .status-block .dest{ font-size: 13.5px; color: #C7C6CC; margin: 0; }
+
+  .trip-details{ padding: 24px 26px 30px; display: flex; flex-direction: column; gap: 16px; }
+  .detail-row{
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--linea); padding-bottom: 13px;
+  }
+  .detail-row .k{ font-size: 12.5px; color: var(--tinta-suave); }
+  .detail-row .v{ font-size: 14px; font-weight: 700; text-align: right; }
+
+  .gps-status{
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; background: var(--rojo-soft);
+    border-radius: 12px; font-size: 12.5px; color: #85433E;
+  }
+  .gps-status .icon-wrap{
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .gps-status .icon-wrap svg{ width: 15px; height: 15px; stroke: var(--rojo); }
+  .gps-status strong{ color: var(--rojo); display:block; font-size: 13px; }
+
+  .close-trip{
+    margin-top: 6px;
+    border: 1.5px solid var(--rojo);
+    background: transparent; color: var(--rojo);
+    font-family: inherit; font-weight: 800; font-size: 14px;
+    padding: 14px; border-radius: 12px; cursor: pointer;
+  }
+  .close-trip:hover{ background: var(--rojo-soft); }
+
+  .confirmed-view{ display:none; flex-direction: column; align-items: center; justify-content: center; padding: 50px 26px; text-align: center; }
+  .confirmed-view.show{ display: flex; }
+  .confirmed-view .mark{
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--rojo); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;
+  }
+  .confirmed-view .mark svg{ width: 24px; height: 24px; }
+  .confirmed-view h2{ font-size: 18px; margin: 0 0 8px; }
+  .confirmed-view p{ font-size: 13.5px; color: var(--tinta-suave); max-width: 28ch; line-height: 1.5; margin: 0; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="screen">
+
+    <div class="ribbon-top">
+      <svg viewBox="0 0 460 46" preserveAspectRatio="none">
+        <path d="M0,0 L460,0 L460,18 C 340,40 120,40 0,18 Z" fill="var(--rojo)"/>
+        <path d="M0,18 C 120,40 340,40 460,18" fill="none" stroke="var(--amarillo)" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <header class="topbar">
+      <div class="logo-badge"><span>FAMOSA</span></div>
+      <div class="brandline">
+        <div class="name"><span class="r">Famosa</span> <span class="sep">·</span> Salidas</div>
+      </div>
+      <div class="clock">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
+        <span id="clock">--:--</span>
+      </div>
+    </header>
+
+    <div class="form-view" id="formView">
+      <main>
+        <div class="hero">
+          <div class="hero-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          </div>
+          <h1 class="title">Registrar salida</h1>
+          <p class="subtitle">Completa los datos antes de salir. Tu jefatura y RR.HH. podrán ver esta información.</p>
+        </div>
+
+        <form id="salidaForm">
+          <div class="field">
+            <div class="label-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <label for="nombre">Nombre completo</label>
+            </div>
+            <input type="text" id="nombre" required placeholder="Ej. Juan Pérez Rodríguez">
+          </div>
+
+          <div class="field">
+            <div class="label-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
+              <label for="motivo">Motivo de la salida</label>
+            </div>
+            <textarea id="motivo" required placeholder="Ej. Trámite en AFP para renovación de datos del personal"></textarea>
+          </div>
+
+          <div class="field">
+            <div class="label-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <label for="destino">Destino</label>
+            </div>
+            <input type="text" id="destino" required placeholder="Ej. Oficinas de AFP Futuro, Av. Arce">
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <div class="label-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
+                <label for="horaSalida">Hora de salida</label>
+              </div>
+              <input type="time" id="horaSalida" required>
+            </div>
+            <div class="field">
+              <div class="label-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><polyline points="3 4 3 10 9 10"></polyline></svg>
+                <label for="horaRetorno">Retorno aprox.</label>
+              </div>
+              <input type="time" id="horaRetorno" required>
+            </div>
+          </div>
+
+          <label class="consent" for="consentCheck">
+            <div class="consent-illustration">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+            </div>
+            <div class="consent-check-wrap">
+              <input type="checkbox" id="consentCheck" required>
+              <span class="consent-text">
+                <strong>Compartir mi ubicación en tiempo real</strong> mientras dure este trámite. Se registrará automáticamente cada hora y se detiene al marcar el retorno.
+              </span>
+            </div>
+          </label>
+
+          <p class="error-text" id="geoError">No pudimos activar tu ubicación. Revisa los permisos del navegador e inténtalo de nuevo.</p>
+
+          <button type="submit" class="submit" id="submitBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            Iniciar salida
+          </button>
+        </form>
+      </main>
+    </div>
+
+    <div class="active-view" id="activeView">
+      <div class="status-block">
+        <div class="status-tag"><span class="dot"></span>EN TRÁNSITO</div>
+        <p class="who" id="activeNombre">—</p>
+        <p class="dest" id="activeDestino">—</p>
+      </div>
+      <div class="trip-details">
+        <div class="detail-row">
+          <span class="k">Motivo</span>
+          <span class="v" id="activeMotivo">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="k">Hora de salida</span>
+          <span class="v" id="activeSalida">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="k">Retorno estimado</span>
+          <span class="v" id="activeRetorno">—</span>
+        </div>
+
+        <div class="gps-status">
+          <div class="icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>
+          </div>
+          <div>
+            <strong>Ubicación activa</strong>
+            <span id="gpsSub">Próximo envío en 60 min</span>
+          </div>
+        </div>
+
+        <button class="close-trip" id="closeTripBtn">Marcar retorno a la empresa</button>
+      </div>
+    </div>
+
+    <div class="confirmed-view" id="confirmedView">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h2>Retorno registrado</h2>
+      <p>Gracias, tu regreso quedó marcado en el sistema. Que tengas un buen resto de jornada.</p>
+    </div>
+
+    <div class="ribbon-bottom">
+      <svg viewBox="0 0 460 46" preserveAspectRatio="none">
+        <path d="M0,46 L460,46 L460,28 C 340,6 120,6 0,28 Z" fill="var(--rojo)"/>
+        <path d="M0,28 C 120,6 340,6 460,28" fill="none" stroke="var(--amarillo)" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function tick(){
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      now.toLocaleTimeString('es-BO', {hour:'2-digit', minute:'2-digit'});
+  }
+  tick(); setInterval(tick, 1000 * 30);
+
+  // ---- Conectado al Web App de Apps Script ----
+  const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzxcprqRDmvIAfu3q2MJ7F-VEdrcaM190bVQospC6-lWIRG5reJFzfZxhSjBV8jKt-Y/exec";
+  const TRACK_INTERVAL_MS = 60 * 60 * 1000; // 60 min
+
+  let tripId = null;
+  let trackTimer = null;
+
+  const form = document.getElementById('salidaForm');
+  const geoError = document.getElementById('geoError');
+
+  function sendToBackend(payload){
+    // Se envía como form-urlencoded para evitar el preflight CORS que bloquea Apps Script.
+    // mode "no-cors" implica que no podemos leer la respuesta, pero el envío sí se completa.
+    const body = new URLSearchParams(payload);
+    fetch(ENDPOINT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: body
+    }).catch(err => console.error("Error al enviar a backend:", err));
+  }
+
+  function startTracking(){
+    if(!navigator.geolocation){
+      geoError.style.display = 'block';
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(sendPosition, handleGeoFail, {enableHighAccuracy:true});
+    trackTimer = setInterval(() => {
+      navigator.geolocation.getCurrentPosition(sendPosition, handleGeoFail, {enableHighAccuracy:true});
+    }, TRACK_INTERVAL_MS);
+  }
+
+  function sendPosition(pos){
+    sendToBackend({
+      id_salida: tripId,
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude,
+      precision: pos.coords.accuracy,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  function handleGeoFail(){
+    geoError.style.display = 'block';
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    geoError.style.display = 'none';
+
+    const data = {
+      nombre: document.getElementById('nombre').value.trim(),
+      motivo: document.getElementById('motivo').value.trim(),
+      destino: document.getElementById('destino').value.trim(),
+      horaSalida: document.getElementById('horaSalida').value,
+      horaRetorno: document.getElementById('horaRetorno').value,
+    };
+
+    tripId = 'SAL-' + Date.now();
+
+    sendToBackend({ tipo: 'apertura', id_salida: tripId, ...data });
+
+    document.getElementById('activeNombre').textContent = data.nombre;
+    document.getElementById('activeDestino').textContent = data.destino;
+    document.getElementById('activeMotivo').textContent = data.motivo;
+    document.getElementById('activeSalida').textContent = data.horaSalida;
+    document.getElementById('activeRetorno').textContent = data.horaRetorno;
+
+    document.getElementById('formView').classList.add('hide');
+    document.getElementById('activeView').classList.add('show');
+
+    startTracking();
+  });
+
+  document.getElementById('closeTripBtn').addEventListener('click', function(){
+    if(trackTimer) clearInterval(trackTimer);
+
+    sendToBackend({
+      tipo: 'cierre',
+      id_salida: tripId,
+      horaRetornoReal: new Date().toLocaleTimeString('es-BO', {hour:'2-digit', minute:'2-digit'})
+    });
+
+    document.getElementById('activeView').classList.remove('show');
+    document.getElementById('confirmedView').classList.add('show');
+  });
+</script>
+
+</body>
+</html>
