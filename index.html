@@ -427,6 +427,8 @@
           </div>
         </div>
 
+        <p class="error-text" id="geoErrorActive" style="display:none;"></p>
+
         <button class="close-trip" id="closeTripBtn">Marcar retorno a la empresa</button>
       </div>
     </div>
@@ -480,12 +482,13 @@
 
   function startTracking(){
     if(!navigator.geolocation){
+      geoError.textContent = "Este navegador no soporta geolocalización.";
       geoError.style.display = 'block';
       return;
     }
-    navigator.geolocation.getCurrentPosition(sendPosition, handleGeoFail, {enableHighAccuracy:true});
+    navigator.geolocation.getCurrentPosition(sendPosition, handleGeoFail, {enableHighAccuracy:true, timeout: 15000});
     trackTimer = setInterval(() => {
-      navigator.geolocation.getCurrentPosition(sendPosition, handleGeoFail, {enableHighAccuracy:true});
+      navigator.geolocation.getCurrentPosition(sendPosition, handleGeoFail, {enableHighAccuracy:true, timeout: 15000});
     }, TRACK_INTERVAL_MS);
   }
 
@@ -498,10 +501,26 @@
       precision: pos.coords.accuracy,
       timestamp: new Date().toISOString()
     });
+    const gpsSub = document.getElementById('gpsSub');
+    if(gpsSub){
+      gpsSub.textContent = "Última ubicación enviada a las " + new Date().toLocaleTimeString('es-BO', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    }
   }
 
-  function handleGeoFail(){
+  function handleGeoFail(error){
+    const mensajes = {
+      1: "Permiso de ubicación denegado. Revisa los permisos del sitio en tu navegador.",
+      2: "No se pudo determinar tu posición (GPS/señal no disponible).",
+      3: "Se agotó el tiempo esperando la ubicación. Intenta en un lugar con mejor señal."
+    };
+    const texto = mensajes[error.code] || ("Error de ubicación: " + error.message);
+    geoError.textContent = texto;
     geoError.style.display = 'block';
+    const geoErrorActive = document.getElementById('geoErrorActive');
+    if(geoErrorActive){
+      geoErrorActive.textContent = texto;
+      geoErrorActive.style.display = 'block';
+    }
   }
 
   form.addEventListener('submit', function(e){
