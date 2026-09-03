@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Registro de Salida — Famosa</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#DD091D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Salidas Famosa">
 <style>
   :root{
     --rojo: #DD091D;
@@ -429,6 +436,8 @@
 
         <p class="error-text" id="geoErrorActive" style="display:none;"></p>
 
+        <button class="close-trip" id="updateNowBtn" style="border-color: var(--tinta); color: var(--tinta); margin-top: -4px;">Actualizar mi ubicación ahora</button>
+
         <button class="close-trip" id="closeTripBtn">Marcar retorno a la empresa</button>
       </div>
     </div>
@@ -461,7 +470,7 @@
 
   // ---- Conectado al Web App de Apps Script ----
   const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzxcprqRDmvIAfu3q2MJ7F-VEdrcaM190bVQospC6-lWIRG5reJFzfZxhSjBV8jKt-Y/exec";
-  const TRACK_INTERVAL_MS = 60 * 60 * 1000; // 60 min
+  const TRACK_INTERVAL_MS = 60 * 60 * 1000; // 60 min (producción)
 
   let tripId = null;
   let trackTimer = null;
@@ -492,6 +501,23 @@
     }, TRACK_INTERVAL_MS);
   }
 
+  let ultimoEnvioManualOAuto = 0;
+  const MIN_MS_ENTRE_ENVIOS = 60 * 1000; // no mandar más de 1 vez por minuto, así se toquen varias veces la pantalla
+
+  function actualizarUbicacionAhora(origen){
+    const ahora = Date.now();
+    if(ahora - ultimoEnvioManualOAuto < MIN_MS_ENTRE_ENVIOS) return;
+    ultimoEnvioManualOAuto = ahora;
+    navigator.geolocation.getCurrentPosition(sendPosition, handleGeoFail, {enableHighAccuracy:true, timeout: 15000});
+  }
+
+  // Envío automático apenas el empleado vuelve a la pestaña (ej. después de usar WhatsApp)
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible' && tripId){
+      actualizarUbicacionAhora('visibilidad');
+    }
+  });
+
   function sendPosition(pos){
     sendToBackend({
       tipo: 'ubicacion',
@@ -501,9 +527,10 @@
       precision: pos.coords.accuracy,
       timestamp: new Date().toISOString()
     });
+    const hora = new Date().toLocaleTimeString('es-BO', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
     const gpsSub = document.getElementById('gpsSub');
     if(gpsSub){
-      gpsSub.textContent = "Última ubicación enviada a las " + new Date().toLocaleTimeString('es-BO', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      gpsSub.textContent = "Última ubicación enviada a las " + hora;
     }
   }
 
@@ -521,6 +548,21 @@
       geoErrorActive.textContent = texto;
       geoErrorActive.style.display = 'block';
     }
+  }
+
+  document.getElementById('updateNowBtn').addEventListener('click', function(){
+    actualizarUbicacionAhora('manual');
+    const gpsSub = document.getElementById('gpsSub');
+    if(gpsSub){ gpsSub.textContent = "Actualizando..."; }
+  });
+
+  // Registro del service worker (necesario para que la página sea instalable como app)
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('service-worker.js').catch(function(err){
+        console.log('No se pudo registrar el service worker:', err);
+      });
+    });
   }
 
   form.addEventListener('submit', function(e){
